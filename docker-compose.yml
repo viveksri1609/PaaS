@@ -10,16 +10,26 @@ services:
       POSTGRES_DB: paas
     ports:
       - "5432:5432"
+    networks:
+      - paas
 
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.6
     container_name: traefik
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - paas
+
+networks:
+  paas:
+    name: paas

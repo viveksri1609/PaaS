@@ -1,8 +1,8 @@
 package main
 
 import (
-	"mini-paas/internal/db"
-	"mini-paas/internal/reconciler"
+	"PaaS/internal/db"
+	"PaaS/internal/reconciler"
 )
 
 func main() {

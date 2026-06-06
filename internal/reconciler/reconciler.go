@@ -1,36 +1,19 @@
 package reconciler
 
-import (
-	"fmt"
-	"time"
-
-	"mini-paas/internal/db"
-	dockerRuntime "mini-paas/internal/docker"
-	"mini-paas/internal/models"
-)
+import "time"
 
 func Start() {
+
 	for {
-		var apps []models.App
 
-		db.DB.Where("status = ?", "pending").Find(&apps)
+		DeployPendingApps()
 
-		for _, app := range apps {
-			fmt.Println("deploying app", app.Name)
+		CheckHealth()
 
-			containerID, err := dockerRuntime.RunContainer(app.Name, app.Image)
+		HealUnhealthyApps()
 
-			if err != nil {
-				fmt.Println(err)
-				app.Status = "failed"
-			} else {
-				app.Status = "running"
-				app.ContainerID = containerID
-			}
-
-			db.DB.Save(&app)
-		}
-
-		time.Sleep(5 * time.Second)
+		time.Sleep(
+			5 * time.Second,
+		)
 	}
 }

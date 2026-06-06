@@ -7,7 +7,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"mini-paas/internal/models"
+	"PaaS/internal/models"
 )
 
 var DB *gorm.DB

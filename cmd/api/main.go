@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 
-	"mini-paas/internal/db"
-	"mini-paas/internal/handlers"
+	"PaaS/internal/db"
+	"PaaS/internal/handlers"
 )
 
 func main() {
@@ -14,6 +14,7 @@ func main() {
 
 	router.POST("/apps", handlers.CreateApp)
 	router.GET("/apps", handlers.GetApps)
+	router.DELETE("/apps/:id", handlers.DeleteApp)
 
 	router.Run(":8081")
 }

@@ -5,8 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"mini-paas/internal/db"
-	"mini-paas/internal/models"
+	"PaaS/internal/db"
+	dockerRuntime "PaaS/internal/docker"
+	"PaaS/internal/models"
 )
 
 type CreateAppRequest struct {
@@ -41,4 +42,38 @@ func GetApps(c *gin.Context) {
 	db.DB.Find(&apps)
 
 	c.JSON(http.StatusOK, apps)
+}
+
+func DeleteApp(c *gin.Context) {
+
+	id := c.Param("id")
+
+	var app models.App
+
+	err := db.DB.First(&app, id).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "app not found",
+		})
+		return
+	}
+
+	if app.ContainerID != "" {
+
+		err := dockerRuntime.DeleteContainer(app.ContainerID)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	db.DB.Delete(&app)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "app deleted successfully",
+	})
 }
