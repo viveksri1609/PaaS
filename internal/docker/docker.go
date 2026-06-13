@@ -2,7 +2,9 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
@@ -82,4 +84,68 @@ func DeleteContainer(containerID string) error {
 	)
 
 	return err
+}
+
+func ContainerLogs(containerID string, tail string) ([]byte, error) {
+	ctx := context.Background()
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, err
+	}
+	defer cli.Close()
+
+	options := client.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Tail:       tail,
+	}
+
+	reader, err := cli.ContainerLogs(ctx, containerID, options)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	return io.ReadAll(reader)
+}
+
+func ContainerInspect(containerID string) (*container.InspectResponse, error) {
+	ctx := context.Background()
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, err
+	}
+	defer cli.Close()
+
+	info, err := cli.ContainerInspect(ctx, containerID, client.ContainerInspectOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &info.Container, nil
+}
+
+func ContainerStats(containerID string) (*container.StatsResponse, error) {
+	ctx := context.Background()
+
+	cli, err := client.New(client.FromEnv)
+	if err != nil {
+		return nil, err
+	}
+	defer cli.Close()
+
+	statsResp, err := cli.ContainerStats(ctx, containerID, client.ContainerStatsOptions{Stream: false, IncludePreviousSample: true})
+	if err != nil {
+		return nil, err
+	}
+	defer statsResp.Body.Close()
+
+	var stats container.StatsResponse
+	if err := json.NewDecoder(statsResp.Body).Decode(&stats); err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
 }

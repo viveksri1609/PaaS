@@ -109,7 +109,7 @@ go get github.com/moby/moby/api/types/network
 Start the supporting services:
 
 ```bash
-docker compose up -d postgres traefik
+docker compose up -d
 ```
 
 ---
@@ -195,6 +195,30 @@ docker logs -f <worker-container-name>
 
 ---
 
+# Logs & Metrics
+
+The API provides endpoints to fetch container logs and runtime metrics for an app and its replicas.
+
+- Get recent logs for an app (includes primary container + replicas):
+
+```bash
+curl "http://localhost:8081/apps/<app-id>/logs?tail=200"
+```
+
+Query params:
+
+- `tail` (optional): number of log lines to return (default: `100`).
+
+- Get runtime metrics (CPU%, memory usage, memory%, restarts, and status):
+
+```bash
+curl http://localhost:8081/apps/<app-id>/metrics
+```
+
+The metrics endpoint returns an array of per-container metrics for the app and its replicas.
+
+---
+
 # Current Notes
 
 * The API handles app creation, listing, scaling, and deletion.
@@ -209,7 +233,7 @@ docker logs -f <worker-container-name>
 * Add automated tests for the API and worker flows.
 * Replace hardcoded database and Docker settings with environment variables.
 * Add app name and image validation.
-* Add logs endpoint support.
+* Logs and metrics endpoints implemented: `GET /apps/:id/logs` and `GET /apps/:id/metrics`.
 * Add a UI for creating, listing, scaling, and deleting apps.
 * Improve replica tracking so the primary app container and scale-out containers are handled separately.
 * Add better status transitions and retry handling for failed deployments.

@@ -14,6 +14,8 @@ func main() {
 
 	router.POST("/apps", handlers.CreateApp)
 	router.GET("/apps", handlers.GetApps)
+	router.GET("/apps/:id/logs", handlers.GetAppLogs)
+	router.GET("/apps/:id/metrics", handlers.GetAppMetrics)
 	router.DELETE("/apps/:id", handlers.DeleteApp)
 	router.POST(
 		"/apps/:id/scale",
