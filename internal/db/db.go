@@ -23,7 +23,10 @@ func Connect() {
 
 	fmt.Println("database connected")
 
-	database.AutoMigrate(&models.App{})
+	database.AutoMigrate(
+		&models.App{},
+		&models.AppInstance{},
+	)
 
 	DB = database
 }

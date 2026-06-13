@@ -36,6 +36,7 @@ func HealUnhealthyApps() {
 		containerID, err :=
 			dockerRuntime.RunContainer(
 				app.Name,
+				app.Name,
 				app.Image,
 			)
 
@@ -51,6 +52,7 @@ func HealUnhealthyApps() {
 		}
 
 		app.ContainerID = containerID
+		app.Status = "running"
 		app.Health = "healthy"
 
 		db.DB.Save(&app)

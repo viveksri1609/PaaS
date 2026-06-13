@@ -18,6 +18,12 @@ func CheckHealth() {
 
 	for _, app := range apps {
 
+		if app.ContainerID == "" {
+			app.Health = "unhealthy"
+			db.DB.Save(&app)
+			continue
+		}
+
 		running, err := dockerRuntime.IsContainerRunning(
 			app.ContainerID,
 		)
@@ -29,7 +35,7 @@ func CheckHealth() {
 				app.Name,
 			)
 
-			app.Health = "unknown"
+			app.Health = "unhealthy"
 
 			db.DB.Save(&app)
 

@@ -11,7 +11,7 @@ import (
 
 const appNetwork = "paas"
 
-func RunContainer(appName string, image string) (string, error) {
+func RunContainer(appName string, containerName string, image string) (string, error) {
 	ctx := context.Background()
 
 	cli, err := client.New(client.FromEnv)
@@ -31,7 +31,7 @@ func RunContainer(appName string, image string) (string, error) {
 	}
 
 	resp, err := cli.ContainerCreate(ctx, client.ContainerCreateOptions{
-		Name: appName,
+		Name: containerName,
 		Config: &container.Config{
 			Image:        image,
 			ExposedPorts: network.PortSet{network.MustParsePort("80/tcp"): struct{}{}},

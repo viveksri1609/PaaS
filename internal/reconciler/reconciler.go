@@ -12,6 +12,8 @@ func Start() {
 
 		HealUnhealthyApps()
 
+		ReconcileReplicas()
+
 		time.Sleep(
 			5 * time.Second,
 		)

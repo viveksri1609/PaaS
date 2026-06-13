@@ -26,12 +26,14 @@ func DeployPendingApps() {
 		containerID, err :=
 			dockerRuntime.RunContainer(
 				app.Name,
+				app.Name,
 				app.Image,
 			)
 
 		if err != nil {
 
 			app.Status = "failed"
+			app.Health = "unknown"
 
 		} else {
 

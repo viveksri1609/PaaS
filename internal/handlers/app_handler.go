@@ -26,12 +26,19 @@ func CreateApp(c *gin.Context) {
 	}
 
 	app := models.App{
-		Name:   req.Name,
-		Image:  req.Image,
-		Status: "pending",
+		Name:     req.Name,
+		Image:    req.Image,
+		Status:   "pending",
+		Health:   "unknown",
+		Replicas: 1,
 	}
 
-	db.DB.Create(&app)
+	if err := db.DB.Create(&app).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusCreated, app)
 }
@@ -50,20 +57,39 @@ func DeleteApp(c *gin.Context) {
 
 	var app models.App
 
-	err := db.DB.First(&app, id).Error
-
-	if err != nil {
+	if err := db.DB.First(&app, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "app not found",
 		})
 		return
 	}
 
-	if app.ContainerID != "" {
+	var instances []models.AppInstance
 
-		err := dockerRuntime.DeleteContainer(app.ContainerID)
+	db.DB.
+		Where("app_id = ?", app.ID).
+		Find(&instances)
+
+	for _, instance := range instances {
+
+		err := dockerRuntime.DeleteContainer(
+			instance.ContainerID,
+		)
 
 		if err != nil {
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		db.DB.Delete(&instance)
+	}
+
+	if app.ContainerID != "" {
+		if err := dockerRuntime.DeleteContainer(app.ContainerID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -71,7 +97,12 @@ func DeleteApp(c *gin.Context) {
 		}
 	}
 
-	db.DB.Delete(&app)
+	if err := db.DB.Delete(&app).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "app deleted successfully",
