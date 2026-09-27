@@ -8,8 +8,34 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: paas
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d paas"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     ports:
       - "5432:5432"
+    networks:
+      - paas
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mini-paas-api
+    environment:
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "/api", "--healthcheck"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
     networks:
       - paas
 

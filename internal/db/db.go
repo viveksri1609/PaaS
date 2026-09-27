@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,7 +14,11 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	dsn := "host=localhost user=admin password=admin dbname=paas port=5432 sslmode=disable"
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	dsn := fmt.Sprintf("host=%s user=admin password=admin dbname=paas port=5432 sslmode=disable", host)
 
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 

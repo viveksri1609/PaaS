@@ -109,8 +109,11 @@ go get github.com/moby/moby/api/types/network
 Start the supporting services:
 
 ```bash
-docker compose up -d
+docker compose up --build -d
+docker compose ps
 ```
+
+The API image uses a Go build stage and a non-root distroless runtime; Compose reports it healthy when `/healthz` responds. The before/after image sizes were not measurable in this environment because the Docker daemon was unavailable (`docker image ls` could not connect); once Docker is running, record them with `docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}'` before and after `docker compose build api`. To observe a failing health check while keeping the container running, suspend and resume the API process with `docker kill --signal=STOP mini-paas-api` and `docker kill --signal=CONT mini-paas-api`, then watch `docker compose ps`.
 
 ---
 
