@@ -196,7 +196,7 @@ GOCACHE=/private/tmp/gocache go test ./...
 docker logs -f <worker-container-name>
 ```
 
----
+
 
 # Logs & Metrics
 
@@ -229,16 +229,41 @@ The metrics endpoint returns an array of per-container metrics for the app and i
 * Docker is used directly to create and manage containers.
 * Traefik handles local routing through `*.localhost`.
 
+
 ---
 
 # Next Steps
 
-* Add automated tests for the API and worker flows.
-* Replace hardcoded database and Docker settings with environment variables.
-* Add app name and image validation.
-* Logs and metrics endpoints implemented: `GET /apps/:id/logs` and `GET /apps/:id/metrics`.
-* Add a UI for creating, listing, scaling, and deleting apps.
-* Improve replica tracking so the primary app container and scale-out containers are handled separately.
-* Add better status transitions and retry handling for failed deployments.
-* Add cleanup and health checks around orphaned containers and database rows.
+1. Solidify the Docker-based control plane
+   * finish reconciliation and error handling in `internal/reconciler/`
+   * enhance container health checks and runtime status reporting
+   * add focused tests for app creation, scaling, and deletion
 
+2. Add a runtime abstraction layer
+   * define a runtime interface for deploy, scale, delete, and status operations
+   * keep the existing Docker backend while preparing future runtimes
+   * reduce direct Docker engine coupling in the reconciler
+
+3. Learn Kubernetes fundamentals
+   * run a local cluster with Docker Desktop, `minikube`, or `kind`
+   * practice `kubectl` commands, `Deployment`, `Service`, `Ingress`, and `Namespace`
+   * learn `ConfigMap`, `Secret`, and pod readiness/health concepts
+
+4. Implement Kubernetes support
+   * add a Kubernetes backend, e.g. `internal/k8s/`
+   * map apps to Kubernetes resources: `Deployment` + `Service` + `Ingress`
+   * use `k8s.io/client-go` or `sigs.k8s.io/controller-runtime`
+   * preserve the current API, DB model, and app lifecycle logic
+
+5. Expand PaaS features on Kubernetes
+   * support namespaces, autoscaling, env vars/config, and persistent storage
+   * add ingress-based host routing and rollout/update behavior
+   * surface app status, logs, and metrics through the API
+
+Recommended learning resources:
+
+* Kubernetes official tutorials: https://kubernetes.io/docs/tutorials/
+* kind: https://kind.sigs.k8s.io/
+* `kubectl` cheat sheet and local cluster practice
+
+---
